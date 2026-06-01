@@ -80,6 +80,27 @@
   /* keep recharts surfaces from showing focus outlines */
   .recharts-wrapper:focus,.recharts-surface:focus{ outline:none; }
   .recharts-default-tooltip{ display:none !important; }
+  .ledger-slider::-webkit-slider-thumb{
+    appearance:none;
+    width:18px;
+    height:18px;
+    border:2px solid hsl(var(--primary));
+    border-radius:999px;
+    background:hsl(var(--background));
+    box-shadow:0 1px 3px rgba(0,0,0,.16);
+    transition:transform .15s ease;
+  }
+  .ledger-slider::-moz-range-thumb{
+    width:14px;
+    height:14px;
+    border:2px solid hsl(var(--primary));
+    border-radius:999px;
+    background:hsl(var(--background));
+    box-shadow:0 1px 3px rgba(0,0,0,.16);
+    transition:transform .15s ease;
+  }
+  .ledger-slider:hover::-webkit-slider-thumb{ transform:scale(1.08); }
+  .ledger-slider:hover::-moz-range-thumb{ transform:scale(1.08); }
 </style>
 </head>
 <body class="bg-background text-foreground">
