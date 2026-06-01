@@ -6,17 +6,17 @@ into the URL so a scenario can be shared with the **Copy link** button.
 
 ## Run Locally
 
-No install or build step is required. Start a static server from this
-directory:
+No install or build step is required for local frontend development. Start a
+static server from this directory:
 
 ```bash
-python3 -m http.server 4173
+npm run serve
 ```
 
 Then open [http://localhost:4173](http://localhost:4173).
 
-The browser needs internet access while loading because React, Babel,
-Tailwind CSS, Recharts, and the Hanken Grotesk font are loaded from CDNs.
+The browser needs internet access while loading because React, Babel, Tailwind
+CSS, Recharts, and the Hanken Grotesk font are loaded from CDNs.
 
 ## Features
 
@@ -32,12 +32,55 @@ Tailwind CSS, Recharts, and the Hanken Grotesk font are loaded from CDNs.
 ## Structure
 
 ```text
-index.html           Entry page, theme variables, and CDN dependencies
-app.jsx              Application state and UI composition
-lib/mortgage.js      Pure mortgage math and URL-state helpers
-ui/components.jsx    Lightweight shadcn-style UI primitives
-ui/charts.jsx        Recharts wrappers and tooltip rendering
+site/index.html           Entry page, theme variables, and CDN dependencies
+site/app.jsx              Application state and UI composition
+site/lib/mortgage.js      Pure mortgage math and URL-state helpers
+site/ui/components.jsx    Lightweight shadcn-style UI primitives
+site/ui/charts.jsx        Recharts wrappers and tooltip rendering
+infra/bin/ledger.ts       CDK app entry point and environment configuration
+infra/lib/                CDK stack for S3, CloudFront, ACM, and Route 53
 ```
+
+## Deploy to AWS
+
+The CDK stack deploys `site/` to a private S3 bucket behind CloudFront. It also
+creates an ACM certificate and Route 53 `A` and `AAAA` alias records for a
+subdomain in an existing hosted zone.
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Create a local configuration file:
+
+```bash
+cp .env.example .env
+```
+
+Set these values in `.env`:
+
+```dotenv
+LEDGER_HOSTED_ZONE_ID=Z0123456789EXAMPLE
+LEDGER_HOSTED_ZONE_NAME=example.com
+LEDGER_SUBDOMAIN=mortgage
+```
+
+The example deploys to `https://mortgage.example.com`. `.env` is ignored by
+Git so public repositories do not expose domain or hosted-zone values.
+
+Deploy:
+
+```bash
+npx cdk bootstrap aws://YOUR_ACCOUNT_ID/us-east-1
+npm run synth
+npm run deploy
+```
+
+CloudFront viewer certificates must be created in `us-east-1`, so the CDK stack
+deploys there. The generated S3 bucket is retained if the stack is destroyed to
+avoid deleting site content unexpectedly.
 
 ## Smoke Test
 
@@ -49,7 +92,7 @@ global.window = {
   location: { search: '', pathname: '/index.html', origin: 'http://localhost' },
   history: { replaceState() {} }
 };
-require('./lib/mortgage.js');
+require('./site/lib/mortgage.js');
 const M = window.Mortgage;
 const result = M.compute({ ...M.DEFAULTS });
 console.log(M.money(result.total));
@@ -57,4 +100,3 @@ NODE
 ```
 
 The default scenario should print `$3,177`.
-

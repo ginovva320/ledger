@@ -2,31 +2,34 @@
 
 ## Project Overview
 
-Ledger is a static mortgage-calculator SPA. It intentionally has no package
-manager, bundler, or generated build output. Serve the repository directory
-directly with a local HTTP server.
+Ledger is a static mortgage-calculator SPA with an AWS CDK deployment layer.
+The frontend intentionally has no bundler or generated build output. CDK
+dependencies are managed with npm.
 
 ## Development
 
 Run:
 
 ```bash
-python3 -m http.server 4173
+npm run serve
 ```
 
 Open `http://localhost:4173`.
 
-Runtime dependencies are loaded from CDNs in `index.html`. Browser verification
-therefore requires internet access.
+Runtime dependencies are loaded from CDNs in `site/index.html`. Browser
+verification therefore requires internet access.
 
 ## File Boundaries
 
-- `index.html`: CDN scripts, Tailwind theme configuration, and global CSS.
-- `app.jsx`: React state, URL synchronization, layout, and user interactions.
-- `lib/mortgage.js`: Pure calculations. Keep this DOM-free and testable from
+- `site/index.html`: CDN scripts, Tailwind theme configuration, and global CSS.
+- `site/app.jsx`: React state, URL synchronization, layout, and user
+  interactions.
+- `site/lib/mortgage.js`: Pure calculations. Keep this DOM-free and testable from
   Node by stubbing `window`.
-- `ui/components.jsx`: Shared shadcn-style primitives.
-- `ui/charts.jsx`: Recharts wrappers, chart legends, and tooltip content.
+- `site/ui/components.jsx`: Shared shadcn-style primitives.
+- `site/ui/charts.jsx`: Recharts wrappers, chart legends, and tooltip content.
+- `infra/bin/ledger.ts`: CDK entry point and environment loading.
+- `infra/lib/ledger-site-stack.ts`: AWS resources and static-site deployment.
 
 ## Implementation Rules
 
@@ -36,8 +39,13 @@ therefore requires internet access.
 - Use Recharts wrappers in `ui/charts.jsx` for chart changes.
 - Keep query parameters backward compatible when adding fields.
 - Do not commit `.playwright-cli/`; it contains local browser-test artifacts.
-- Avoid introducing a build tool unless the task explicitly calls for a
-  production packaging migration.
+- Do not commit `.env`, `node_modules/`, or `cdk.out/`.
+- Keep domain and hosted-zone values configurable through environment
+  variables. Do not hardcode private DNS values.
+- Deploy only `site/` through `BucketDeployment`.
+- Keep the CloudFront certificate stack in `us-east-1`.
+- Avoid introducing a frontend build tool unless the task explicitly calls for
+  a production packaging migration.
 
 ## Verification
 
@@ -48,6 +56,12 @@ For UI changes:
 3. Exercise the affected interaction in a browser.
 4. Check that URL parameters update when scenario inputs change.
 
-For calculation changes, run a Node smoke test against `lib/mortgage.js` and
-cover the altered edge case.
+For calculation changes, run a Node smoke test against `site/lib/mortgage.js`
+and cover the altered edge case.
 
+For infrastructure changes:
+
+1. Copy `.env.example` to `.env` and set non-secret local values.
+2. Run `npm run typecheck`.
+3. Run `npm run synth`.
+4. Review the synthesized resources before deploying.
