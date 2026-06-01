@@ -98,7 +98,7 @@ export class LedgerSiteStack extends Stack {
       distribution,
       distributionPaths: ['/*'],
       prune: true,
-      sources: [s3deploy.Source.asset(path.join(__dirname, '../../site'))],
+      sources: [s3deploy.Source.asset(path.join(__dirname, '../../.site-dist'))],
     });
 
     new CfnOutput(this, 'SiteUrl', {

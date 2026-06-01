@@ -30,6 +30,9 @@ verification therefore requires internet access.
 - `site/ui/charts.jsx`: Recharts wrappers, chart legends, and tooltip content.
 - `infra/bin/ledger.ts`: CDK entry point and environment loading.
 - `infra/lib/ledger-site-stack.ts`: AWS resources and static-site deployment.
+- `scripts/deploy-site.sh`: Content-only AWS CLI deployment fast path.
+- `scripts/render-site.mjs`: Renders `.site-dist/` with deploy-time Open Graph
+  URLs.
 
 ## Implementation Rules
 
@@ -39,10 +42,12 @@ verification therefore requires internet access.
 - Use Recharts wrappers in `ui/charts.jsx` for chart changes.
 - Keep query parameters backward compatible when adding fields.
 - Do not commit `.playwright-cli/`; it contains local browser-test artifacts.
-- Do not commit `.env`, `node_modules/`, or `cdk.out/`.
+- Do not commit `.env`, `.site-dist/`, `node_modules/`, or `cdk.out/`.
 - Keep domain and hosted-zone values configurable through environment
   variables. Do not hardcode private DNS values.
-- Deploy only `site/` through `BucketDeployment`.
+- Render `site/` into `.site-dist/` before deploying.
+- Deploy only `.site-dist/` through `BucketDeployment` or the AWS CLI fast path.
+- Keep `scripts/deploy-site.sh` aligned with the CDK stack output names.
 - Keep the CloudFront certificate stack in `us-east-1`.
 - Avoid introducing a frontend build tool unless the task explicitly calls for
   a production packaging migration.

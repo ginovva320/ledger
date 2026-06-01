@@ -70,17 +70,32 @@ LEDGER_SUBDOMAIN=mortgage
 The example deploys to `https://mortgage.example.com`. `.env` is ignored by
 Git so public repositories do not expose domain or hosted-zone values.
 
-Deploy:
+Bootstrap the target environment once, then deploy:
 
 ```bash
 npx cdk bootstrap aws://YOUR_ACCOUNT_ID/us-east-1
-npm run synth
 npm run deploy
 ```
 
 CloudFront viewer certificates must be created in `us-east-1`, so the CDK stack
 deploys there. The generated S3 bucket is retained if the stack is destroyed to
 avoid deleting site content unexpectedly.
+
+`npm run deploy` renders `.site-dist/` with the configured public URL for Open
+Graph metadata, then runs `cdk deploy`. CDK synthesizes automatically. Use
+`npm run synth` separately only when you want to inspect the generated
+CloudFormation template before deploying.
+
+For content-only updates after the stack exists, use the faster AWS CLI path:
+
+```bash
+npm run deploy:site
+```
+
+This script reads the bucket name and CloudFront distribution ID from the
+deployed CloudFormation stack, renders `.site-dist/`, syncs it to S3 with
+deleted files pruned, and creates a `/*` CloudFront invalidation. Set
+`LEDGER_STACK_NAME` if the stack was deployed with a non-default name.
 
 ## Smoke Test
 

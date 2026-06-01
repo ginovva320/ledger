@@ -4,10 +4,12 @@
   "private": true,
   "scripts": {
     "serve": "python3 -m http.server 4173 --directory site",
+    "build:site": "node scripts/render-site.mjs",
     "typecheck": "tsc --noEmit",
-    "synth": "cdk synth",
-    "diff": "cdk diff",
-    "deploy": "cdk deploy",
+    "synth": "npm run build:site && cdk synth",
+    "diff": "npm run build:site && cdk diff",
+    "deploy": "npm run build:site && cdk deploy",
+    "deploy:site": "./scripts/deploy-site.sh",
     "destroy": "cdk destroy"
   },
   "dependencies": {

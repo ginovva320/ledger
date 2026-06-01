@@ -1,4 +1,5 @@
 .playwright-cli/
 .env
+.site-dist/
 cdk.out/
 node_modules/
