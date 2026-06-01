@@ -97,6 +97,7 @@ export class LedgerSiteStack extends Stack {
       destinationBucket: bucket,
       distribution,
       distributionPaths: ['/*'],
+      memoryLimit: 512,
       prune: true,
       sources: [s3deploy.Source.asset(path.join(__dirname, '../../.site-dist'))],
     });
