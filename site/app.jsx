@@ -50,7 +50,7 @@ function buildQuery(s) {
   const p = new URLSearchParams();
   p.set('mode', s.mode);
   ['price', 'dp', 'term', 'rate', 'tax', 'ins', 'hoa', 'pmi', 'target', 'dpPct'].forEach(k =>
-    p.set(k, String(Math.round(s[k] * 1000) / 1000)));
+    p.set(k, String(s[k])));
   return p.toString();
 }
 
@@ -69,7 +69,7 @@ function Segmented({ options, value, onChange }) {
   );
 }
 
-function NumberField({ id, label, unit, value, onChange, min, max, step, prefix = "$", suffix, slider = true, fmtVal }) {
+function NumberField({ id, label, unit, value, onChange, min, max, step, prefix = "$", suffix, slider = true }) {
   const [focused, setFocused] = useState(false);
   const [draft, setDraft] = useState(String(value));
   useEffect(() => {
@@ -80,7 +80,7 @@ function NumberField({ id, label, unit, value, onChange, min, max, step, prefix 
     onChange(next);
     setDraft(String(next));
   };
-  const display = focused ? draft : (fmtVal ? fmtVal(value) : grp(value));
+  const display = focused ? draft : (prefix === "$" ? grp(value) : String(value));
   return (
     <div className="space-y-2">
       <div className="flex items-baseline justify-between gap-3">
@@ -259,7 +259,7 @@ function LedgerApp() {
               ) : (
                 <Row>
                   <NumberField id="target" label="Monthly budget" unit="all-in / mo" value={s.target} onChange={(v) => set({ target: v })} min={500} max={20000} step={50} />
-                  <NumberField id="dpPct" label="Down payment" value={s.dpPct} onChange={(v) => set({ dpPct: Math.min(50, v) })} min={0} max={50} step={0.5} prefix={null} suffix="%" fmtVal={(v) => (Math.round(v * 10) / 10)} />
+                  <NumberField id="dpPct" label="Down payment" value={s.dpPct} onChange={(v) => set({ dpPct: Math.min(50, v) })} min={0} max={50} step={0.5} prefix={null} suffix="%" />
                 </Row>
               )}
 
@@ -269,14 +269,14 @@ function LedgerApp() {
                 <Segmented value={s.term} onChange={(v) => set({ term: v })}
                   options={[{ value: 10, label: '10 yr' }, { value: 15, label: '15 yr' }, { value: 20, label: '20 yr' }, { value: 30, label: '30 yr' }]} />
               </div>
-              <NumberField id="rate" label="Interest rate" value={s.rate} onChange={(v) => set({ rate: v })} min={0} max={12} step={0.05} prefix={null} suffix="%" fmtVal={(v) => (Math.round(v * 100) / 100)} />
+              <NumberField id="rate" label="Interest rate" value={s.rate} onChange={(v) => set({ rate: v })} min={0} max={12} step={0.05} prefix={null} suffix="%" />
 
               <Separator />
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Recurring costs</p>
               <NumberField id="tax" label="Property tax" unit="/ yr" value={s.tax} onChange={(v) => set({ tax: v })} min={0} max={30000} step={100} />
               <NumberField id="ins" label="Home insurance" unit="/ yr" value={s.ins} onChange={(v) => set({ ins: v })} min={0} max={10000} step={50} />
               <NumberField id="hoa" label="HOA dues" unit="/ mo" value={s.hoa} onChange={(v) => set({ hoa: v })} min={0} max={2000} step={10} />
-              <NumberField id="pmi" label="PMI rate" unit="/ yr of loan" value={s.pmi} onChange={(v) => set({ pmi: v })} min={0} max={2} step={0.05} prefix={null} suffix="%" fmtVal={(v) => (Math.round(v * 100) / 100)} />
+              <NumberField id="pmi" label="PMI rate" unit="/ yr of loan" value={s.pmi} onChange={(v) => set({ pmi: v })} min={0} max={2} step={0.05} prefix={null} suffix="%" />
               <p className="text-xs text-muted-foreground">
                 {m.pmiActive
                   ? <>PMI applies while the down payment is under 20% — <span className="font-medium text-foreground">{money(m.monthlyPmi)}/mo</span>.</>
