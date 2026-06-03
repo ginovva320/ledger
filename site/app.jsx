@@ -71,14 +71,14 @@ function Segmented({ options, value, onChange }) {
 
 function NumberField({ id, label, unit, value, onChange, min, max, step, prefix = "$", suffix, slider = true, fmtVal }) {
   const [focused, setFocused] = useState(false);
-  const [draft, setDraft] = useState(String(Math.round(value * 100) / 100));
+  const [draft, setDraft] = useState(String(Math.round(value * 1000) / 1000));
   useEffect(() => {
-    if (!focused) setDraft(String(Math.round(value * 100) / 100));
+    if (!focused) setDraft(String(Math.round(value * 1000) / 1000));
   }, [value, focused]);
   const commit = (raw) => {
     const next = Math.min(max ?? Infinity, Math.max(min ?? 0, parseNum(raw)));
     onChange(next);
-    setDraft(String(Math.round(next * 100) / 100));
+    setDraft(String(Math.round(next * 1000) / 1000));
   };
   const display = focused ? draft : (fmtVal ? fmtVal(value) : grp(value));
   return (
